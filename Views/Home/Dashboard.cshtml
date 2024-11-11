@@ -1,0 +1,132 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row">
+    <div class="col-6">
+        <div class="card shadow">
+            <div id="graficoPromedioDesemepenoSatisfaccion"></div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card shadow">
+            <div id="graficoPuntajeDesemepenoSatisfaccion"></div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card shadow">
+            <div id="graficoCantidad"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        padding: 20px;
+        margin: 20px;
+        border-radius: 12px;
+        background-color: #f9f9f9;
+    }
+
+    .shadow {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h2 {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const departamentos = @Html.Raw(ViewBag.Departamentos);
+        const promedioDesempeno = @Html.Raw(ViewBag.PromedioDesempeno);
+        const promedioSatisfaccion = @Html.Raw(ViewBag.PromedioSatisfaccion);
+        const puntajeDesempeno = @Html.Raw(ViewBag.PuntajeDesempeno);
+        const puntajeSatisfaccion = @Html.Raw(ViewBag.PuntajeSatisfaccion);
+        const Cantidad = @Html.Raw(ViewBag.CantidadPorDepartamento);
+
+        const configuracionGraficoPromedioDesemepenoSatisfaccion = {
+            chart: {
+                type: 'radar',
+                background: '#ffffff',
+                foreColor: '#333',
+                dropShadow: { enabled: true, top: 3, left: 3, blur: 5, color: '#b3b3b3' }
+            },
+            colors: ['#00bfff', '#ff7f50'],
+            series: [
+                { name: 'Desempeño Promedio', data: promedioDesempeno },
+                { name: 'Satisfacción Promedio', data: promedioSatisfaccion }
+            ],
+            labels: departamentos,
+            title: { text: 'Desempeño y Satisfacción Promedio: Comparativa entre Departamentos' },
+            stroke: { width: 2, colors: ['#00bfff', '#ff7f50'] }
+        };
+
+        const graficoPromedioDesemepenoSatisfaccion = new ApexCharts(
+            document.getElementById("graficoPromedioDesemepenoSatisfaccion"),
+            configuracionGraficoPromedioDesemepenoSatisfaccion
+        );
+        graficoPromedioDesemepenoSatisfaccion.render();
+
+        const configuracionGraficoPuntajeDesemepenoSatisfaccion = {
+            chart: {
+                type: 'bar',
+                background: '#ffffff',
+                foreColor: '#333',
+                dropShadow: { enabled: true, top: 3, left: 3, blur: 5, color: '#b3b3b3' }
+            },
+            colors: ['#00bfff', '#ff7f50'],
+            series: [
+                { name: 'Desempeño', data: puntajeDesempeno.map(e => e.toFixed(2)) },
+                { name: 'Satisfacción', data: puntajeSatisfaccion.map(e => e.toFixed(2)) }
+            ],
+            xaxis: { categories: departamentos },
+            title: { text: 'Puntaje de Desempeño y Satisfacción por Departamento' },
+            plotOptions: {
+                bar: { borderRadius: 4, dataLabels: { position: 'top' } }
+            },
+            dataLabels: { enabled: true, offsetY: -20, style: { fontSize: '12px', colors: ["#304758"] } }
+        };
+
+        const graficoPuntajeDesemepenoSatisfaccion = new ApexCharts(
+            document.getElementById('graficoPuntajeDesemepenoSatisfaccion'),
+            configuracionGraficoPuntajeDesemepenoSatisfaccion
+        );
+
+        graficoPuntajeDesemepenoSatisfaccion.render();
+
+        const data = Cantidad.map(item => ({ x: item.Departamento, y: item.CantidadEmpleados }));
+
+        const configuracionGraficoCantidad = {
+            chart: { type: 'treemap', height: 350, background: '#ffffff' },
+            series: [{ data: data }],
+            colors: ['#8fd3f4', '#a9a9e6', '#b39ddb', '#c5cae9', '#f8bbd0'],
+            legend: { show: false },
+            title: { text: 'Distribución de Empleados por Departamento' },
+            plotOptions: {
+                treemap: {
+                    distributed: true,
+                    enableShades: false,
+                    colorScale: {
+                        ranges: [
+                            { from: 0, to: 50, color: '#00bfff' },
+                            { from: 51, to: 100, color: '#ff7f50' },
+                            { from: 101, to: 200, color: '#ffeb3b' }
+                        ]
+                    }
+                }
+            }
+        };
+
+        const graficoCantidad = new ApexCharts(
+            document.getElementById('graficoCantidad'),
+            configuracionGraficoCantidad
+        );
+
+        graficoCantidad.render();
+    });
+</script>
